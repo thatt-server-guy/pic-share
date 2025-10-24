@@ -1,16 +1,15 @@
-import { Router } from 'express';
+import express from 'express';
 import { getUserProfile, updateUserProfile, deleteUser } from '../controllers/users';
-import { authenticate } from '../middleware/auth';
 
-const router = Router();
+const router = express.Router();
 
 // Get user profile
-router.get('/profile', authenticate, getUserProfile);
+router.get('/:id', getUserProfile);
 
 // Update user profile
-router.put('/profile', authenticate, updateUserProfile);
+router.put('/:id', updateUserProfile);
 
-// Delete user account
-router.delete('/profile', authenticate, deleteUser);
+// Delete user
+router.delete('/:id', deleteUser);
 
 export default router;

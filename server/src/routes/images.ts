@@ -1,19 +1,69 @@
 import express from 'express';
-import { uploadImage, getImages, likeImage, commentOnImage } from '../controllers/images';
-import { authenticate } from '../middleware/auth';
+import Image from '../models/Image';
+import { uploadImage, getAllImages, likeImage, commentOnImage } from '../controllers/images';
 
 const router = express.Router();
 
-// Route to upload an image
-router.post('/', authenticate, uploadImage);
+// Get all images
+router.get('/', getAllImages);
 
-// Route to get all images
-router.get('/', getImages);
+// Upload image
+router.post('/', async (req, res) => {
+  try {
+    const { caption, imageUrl, uploaderId } = req.body;
+    const newImage = new Image({
+      caption,
+      imageUrl,
+      uploaderId
+    });
+    await newImage.save();
+    res.status(201).json(newImage);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
-// Route to like an image
-router.post('/:id/like', authenticate, likeImage);
+// Like/Unlike image
+router.post('/:id/like', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const image = await Image.findById(req.params.id);
+    
+    if (!image) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
 
-// Route to comment on an image
-router.post('/:id/comment', authenticate, commentOnImage);
+    const likeIndex = image.likes.indexOf(userId);
+    if (likeIndex === -1) {
+      image.likes.push(userId);
+    } else {
+      image.likes.splice(likeIndex, 1);
+    }
+
+    await image.save();
+    res.json(image);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add comment
+router.post('/:id/comment', async (req, res) => {
+  try {
+    const { userId, text } = req.body;
+    const image = await Image.findById(req.params.id);
+    
+    if (!image) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+
+    image.comments.push({ user: userId, text } as any); // Type assertion to fix TS error
+
+    await image.save();
+    res.json(image);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 export default router;

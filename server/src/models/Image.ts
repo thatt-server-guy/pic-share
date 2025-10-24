@@ -1,24 +1,42 @@
-export interface Image {
-    _id: string;
-    uploaderId: string;
-    imageUrl: string;
-    caption: string;
-    uploadDate: Date;
-    likes: string[];
-    comments: string[];
-}
+import mongoose, { Schema, Document } from 'mongoose';
+import { IImage } from '../types';
 
-import mongoose, { Schema } from 'mongoose';
-
-const imageSchema = new Schema<Image>({
-    uploaderId: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    caption: { type: String, required: true },
-    uploadDate: { type: Date, default: Date.now },
-    likes: { type: [String], default: [] },
-    comments: { type: [String], default: [] },
+const imageSchema = new Schema({
+  caption: {
+    type: String,
+    required: true
+  },
+  imageUrl: {
+    type: String,
+    required: true
+  },
+  uploaderId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  likes: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  comments: [{
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    text: {
+      type: String,
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-const ImageModel = mongoose.model<Image>('Image', imageSchema);
-
-export default ImageModel;
+export default mongoose.model<IImage>('Image', imageSchema);
