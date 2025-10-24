@@ -1,40 +1,91 @@
 import { Request, Response } from 'express';
-import User from '../models/User';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import User from '../models/User';
 
-// User signup
-export const signUp = async (req: Request, res: Response) => {
-    const { username, email, password } = req.body;
-
+export const signup = async (req: Request, res: Response) => {
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ username, email, password: hashedPassword });
-        await newUser.save();
-        res.status(201).json({ message: 'User created successfully' });
+        const { username, email, password } = req.body;
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ 
+            $or: [{ email }, { username }] 
+        });
+
+        if (existingUser) {
+            return res.status(400).json({ 
+                message: 'User with this email or username already exists' 
+            });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        // Create new user
+        const user = new User({
+            username,
+            email,
+            password: hashedPassword
+        });
+
+        await user.save();
+
+        // Create token
+        const token = jwt.sign(
+            { userId: user._id },
+            process.env.JWT_SECRET || 'fallback_secret',
+            { expiresIn: '1h' }
+        );
+
+        res.status(201).json({
+            token,
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                createdAt: user.createdAt
+            }
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Error creating user', error });
+        console.error('Signup error:', error);
+        res.status(500).json({ message: 'Error creating user' });
     }
 };
 
-// User login
 export const login = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-
     try {
+        const { email, password } = req.body;
+
+        // Find user
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
-        res.status(200).json({ token });
+        // Check password
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        // Create token
+        const token = jwt.sign(
+            { userId: user._id },
+            process.env.JWT_SECRET || 'fallback_secret',
+            { expiresIn: '1h' }
+        );
+
+        res.json({
+            token,
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                createdAt: user.createdAt
+            }
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Error logging in', error });
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Error logging in' });
     }
 };

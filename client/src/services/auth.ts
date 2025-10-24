@@ -25,11 +25,3 @@ export const signup = async (username: string, email: string, password: string):
 export const logout = () => {
     localStorage.removeItem('token');
 };
-
-// Example for LoginPage.tsx
-const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  // Replace history.push() with navigate()
-  // Example: history.push('/') becomes navigate('/')
-  // ...
-};

@@ -8,14 +8,14 @@ export interface IUser {
 export interface IComment {
     _id: string;
     text: string;
-    userId: IUser;
+    user: IUser;
     createdAt: string;
 }
 
 export interface IImage {
     _id: string;
-    url: string;
     caption: string;
+    imageUrl: string;
     uploaderId: IUser;
     likes: string[];
     comments: IComment[];

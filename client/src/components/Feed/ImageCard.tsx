@@ -1,29 +1,31 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { IImage } from '../../types';
 
 interface ImageCardProps {
-    imageUrl: string;
-    caption: string;
-    likes: number;
-    onLike: () => void;
-    onComment: () => void;
+    image: IImage;
 }
 
-const ImageCard: React.FC<ImageCardProps> = ({ imageUrl, caption, likes, onLike, onComment }) => {
+const ImageCard: React.FC<ImageCardProps> = ({ image }) => {
     return (
-        <div className="border rounded-lg overflow-hidden shadow-md">
-            <img src={imageUrl} alt={caption} className="w-full h-48 object-cover" />
-            <div className="p-4">
-                <h3 className="text-lg font-semibold">{caption}</h3>
-                <div className="flex justify-between items-center mt-2">
-                    <button onClick={onLike} className="text-blue-500">
-                        Like {likes}
-                    </button>
-                    <button onClick={onComment} className="text-blue-500">
-                        Comment
-                    </button>
+        <Link to={`/images/${image._id}`} className="block">
+            <div className="rounded overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                <img 
+                    src={image.imageUrl} 
+                    alt={image.caption}
+                    className="w-full h-48 object-cover"
+                    loading="lazy"
+                />
+                <div className="px-6 py-4">
+                    <p className="text-gray-700 text-base truncate">{image.caption}</p>
+                    <div className="flex items-center mt-2 text-sm text-gray-600">
+                        <span>{image.likes.length} likes</span>
+                        <span className="mx-2">•</span>
+                        <span>{image.comments.length} comments</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 };
 

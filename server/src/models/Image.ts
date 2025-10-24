@@ -1,14 +1,32 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { IImage } from '../types';
+import mongoose, { Document, Schema } from 'mongoose';
+import { IUser } from './User';
+
+export interface IComment {
+  user: Schema.Types.ObjectId | IUser;
+  text: string;
+  createdAt: Date;
+}
+
+export interface IImage extends Document {
+  caption: string;
+  image: {
+    data: Buffer;
+    contentType: string;
+  };
+  uploaderId: Schema.Types.ObjectId | IUser;
+  likes: (Schema.Types.ObjectId | IUser)[];
+  comments: IComment[];
+  createdAt: Date;
+}
 
 const imageSchema = new Schema({
   caption: {
     type: String,
     required: true
   },
-  imageUrl: {
-    type: String,
-    required: true
+  image: {
+    data: Buffer,
+    contentType: String
   },
   uploaderId: {
     type: Schema.Types.ObjectId,
@@ -22,7 +40,8 @@ const imageSchema = new Schema({
   comments: [{
     user: {
       type: Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
     },
     text: {
       type: String,
