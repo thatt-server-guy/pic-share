@@ -1,23 +1,21 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { signUp } from '../services/auth';
+import { useNavigate } from 'react-router-dom';
+import { signup } from '../services/auth';
 
 const SignUpPage: React.FC = () => {
+    const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const history = useHistory();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-
         try {
-            await signUp({ username, email, password });
-            history.push('/login');
-        } catch (err) {
-            setError('Failed to sign up. Please try again.');
+            await signup(username, email, password);
+            navigate('/login');
+        } catch (err: any) {
+            setError(err.message);
         }
     };
 

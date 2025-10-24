@@ -1,34 +1,36 @@
-export interface User {
-    id: string;
+export interface IUser {
+    _id: string;
     username: string;
     email: string;
-    createdAt: Date;
+    createdAt: string;
 }
 
-export interface Image {
-    id: string;
+export interface IComment {
+    _id: string;
+    text: string;
+    userId: IUser;
+    createdAt: string;
+}
+
+export interface IImage {
+    _id: string;
     url: string;
     caption: string;
-    uploaderId: string;
-    uploadDate: Date;
-    likes: number;
-    comments: Comment[];
-}
-
-export interface Comment {
-    id: string;
-    imageId: string;
-    userId: string;
-    text: string;
-    createdAt: Date;
+    uploaderId: IUser;
+    likes: string[];
+    comments: IComment[];
+    createdAt: string;
 }
 
 export interface AuthResponse {
     token: string;
-    user: User;
+    user: IUser;
 }
 
-export interface UploadImagePayload {
-    file: File;
-    caption: string;
+export interface ImageCardProps {
+    image: IImage;
+}
+
+export interface ImageUploadProps {
+    onUploadSuccess: () => void;
 }

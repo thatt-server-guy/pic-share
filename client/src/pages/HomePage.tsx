@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import ImageGrid from '../components/Feed/ImageGrid';
+import { IImage } from '../types';
 import { fetchImages } from '../services/api';
 
 const HomePage: React.FC = () => {
-    const [images, setImages] = useState([]);
+    const [images, setImages] = useState<IImage[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
